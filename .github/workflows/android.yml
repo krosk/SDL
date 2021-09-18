@@ -12,3 +12,26 @@ jobs:
           ndk-version: r21e
       - name: Build
         run: ./build-scripts/androidbuildlibs.sh
+        
+      - name: Package library
+        uses: TheDoctor0/zip-release@0.6.0
+        with:
+          type: zip
+          filename: libsdl2-android-all-${{ github.event.inputs.release_version || env.DEFAULT_RELEASE }}.zip
+          directory: ./build
+
+      - name: Tag Repo
+        uses: richardsimko/update-tag@v1
+        with:
+          tag_name: Android-${{ github.event.inputs.release_version || env.DEFAULT_RELEASE }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update binaries of release
+        uses: svenstaro/upload-release-action@v1-release
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: build/libsdl2-android-all-${{ github.event.inputs.release_version || env.DEFAULT_RELEASE }}.zip
+          asset_name: libsdl2-android-all-${{ github.event.inputs.release_version || env.DEFAULT_RELEASE }}.zip
+          tag: Android-${{ github.event.inputs.release_version || env.DEFAULT_RELEASE }}
+          overwrite: true
