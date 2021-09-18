@@ -1,6 +1,17 @@
 name: Build (Android)
 
-on: [push, pull_request]
+env:
+  DEFAULT_RELEASE: 'latest'
+
+on:
+  push:
+  
+  workflow_dispatch:
+    inputs:
+      release_version:
+        description: 'Release version (no space)'
+        required: true
+        default: 'latest'
 
 jobs:
   android:
@@ -18,7 +29,8 @@ jobs:
         with:
           type: zip
           filename: libsdl2-android-all-${{ github.event.inputs.release_version || env.DEFAULT_RELEASE }}.zip
-          directory: ./build
+          directory: ./build/android/
+          exclusions: obj/*
 
       - name: Tag Repo
         uses: richardsimko/update-tag@v1
@@ -31,7 +43,7 @@ jobs:
         uses: svenstaro/upload-release-action@v1-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: build/libsdl2-android-all-${{ github.event.inputs.release_version || env.DEFAULT_RELEASE }}.zip
+          file: build/android/libsdl2-android-all-${{ github.event.inputs.release_version || env.DEFAULT_RELEASE }}.zip
           asset_name: libsdl2-android-all-${{ github.event.inputs.release_version || env.DEFAULT_RELEASE }}.zip
           tag: Android-${{ github.event.inputs.release_version || env.DEFAULT_RELEASE }}
           overwrite: true
